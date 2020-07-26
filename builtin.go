@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
+	l "log"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/go-redis/redis"
 )
+
+var log = l.New(os.Stdout, "bedis", l.LstdFlags)
 
 // BuiltinRedis represents the redis runing on localhost,
 // connected via a socket
@@ -23,6 +25,8 @@ type BuiltinRedis interface {
 
 // Option to config the builtin redis
 type Option struct {
+	MuteLog bool
+
 	// Set a memory usage limit to the specified amount of bytes.
 	// When the memory limit is reached Redis will try to remove keys
 	// according to the eviction policy selected (see maxmemory-policy).
@@ -38,6 +42,9 @@ type Option struct {
 // however, if the redis-server exit for 3 times, library will panic,
 // means the builtin redis is not avaliable
 func New(opt Option) (_ BuiltinRedis, err error) {
+	if opt.MuteLog {
+		log.SetOutput(ioutil.Discard)
+	}
 	// mk root path
 	if err := _makeDir(root); err != nil {
 		return nil, err

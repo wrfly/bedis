@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"log"
 	"os/exec"
 	"time"
 )
@@ -37,14 +36,14 @@ func (r *builtinRedis) start(ctx context.Context) error {
 	go func() {
 		in := bufio.NewScanner(stdout)
 		for in.Scan() {
-			log.Printf("built-in-redis: %s", in.Text())
+			log.Println(in.Text())
 		}
 	}()
 
 	go func() {
 		in := bufio.NewScanner(stderr)
 		for in.Scan() {
-			log.Printf("built-in-redis: %s", in.Text())
+			log.Println(in.Text())
 		}
 	}()
 

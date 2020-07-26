@@ -3,7 +3,6 @@ package bedis
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -55,7 +54,7 @@ func _smokeTest() error {
 	in := bufio.NewScanner(stdout)
 
 	for in.Scan() {
-		log.Printf("builtin-redis: %s", in.Text())
+		log.Println(in.Text())
 	}
 
 	return in.Err()
