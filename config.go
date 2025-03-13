@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const _configURL = "https://raw.githubusercontent.com/wrfly/redis-server.tgz/master/redis.conf"
+const _configURL = "https://raw.githubusercontent.com/wrfly/redis-server.tgz/master/7.4.2/redis.conf"
 
 var _defaultConfigs = `
 # do not save to disk

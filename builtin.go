@@ -3,16 +3,16 @@ package bedis
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	l "log"
+	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 )
 
-var log = l.New(os.Stdout, "bedis", l.LstdFlags)
+var logs = log.New(os.Stdout, "bedis", log.LstdFlags)
 
 // BuiltinRedis represents the redis runing on localhost,
 // connected via a socket
@@ -43,14 +43,14 @@ type Option struct {
 // means the builtin redis is not avaliable
 func New(opt Option) (_ BuiltinRedis, err error) {
 	if opt.MuteLog {
-		log.SetOutput(ioutil.Discard)
+		logs.SetOutput(io.Discard)
 	}
 	// mk root path
 	if err := _makeDir(root); err != nil {
 		return nil, err
 	}
 	// x.* doesn't work on go1.13
-	runtimePath, err := ioutil.TempDir(root, fmt.Sprintf("%d.", os.Getpid()))
+	runtimePath, err := os.MkdirTemp(root, fmt.Sprintf("%d.", os.Getpid()))
 	if err != nil {
 		return nil, fmt.Errorf("create temp dir err: %s", err)
 	}
@@ -83,15 +83,15 @@ func New(opt Option) (_ BuiltinRedis, err error) {
 		backoffTime := time.Millisecond * 100
 		for i := 0; i < 3; i++ {
 			if err := builtin.start(ctx); err != nil {
-				log.Printf("redis exit with error: %s, restart redis", err)
+				logs.Printf("redis exit with error: %s, restart redis", err)
 			} else {
-				log.Printf("redis exit with nil error, restart redis")
+				logs.Printf("redis exit with nil error, restart redis")
 			}
 			time.Sleep(backoffTime)
 			backoffTime *= 2
 
 			if ctx.Err() != nil {
-				log.Printf("user cancled, stop redis")
+				logs.Printf("user cancled, stop redis")
 				return
 			}
 		}
@@ -124,7 +124,7 @@ func (r *builtinRedis) NewClient(cfg redis.Options) (*redis.Client, error) {
 	cfg.Network = "unix"
 	cfg.Addr = r.socketPath
 	client := redis.NewClient(&cfg)
-	if err := client.Ping().Err(); err != nil {
+	if err := client.Ping(context.Background()).Err(); err != nil {
 		return nil, err
 	}
 	r.clients = append(r.clients, client)

@@ -12,8 +12,8 @@ import (
 
 const (
 	_repo       = "https://github.com/wrfly/redis-server.tgz"
-	_linkLinux  = _repo + "/raw/master/redis-server-6.0.5.tgz"
-	_linkDarwin = _repo + "/raw/master/redis-server-6.0.5-darwin-x86_64.tgz"
+	_linkLinux  = _repo + "/raw/master/7.4.2/redis-server-linux-libc-x86_64.tgz"
+	_linkDarwin = _repo + "/raw/master/7.4.2/redis-server-darwin-libc-arm64.tgz"
 )
 
 var (
@@ -54,7 +54,7 @@ func _smokeTest() error {
 	in := bufio.NewScanner(stdout)
 
 	for in.Scan() {
-		log.Println(in.Text())
+		logs.Println(in.Text())
 	}
 
 	return in.Err()
@@ -63,7 +63,7 @@ func _smokeTest() error {
 // mk all the directories, download binary tarball, write config
 // and check the binary downloaded
 func (r *builtinRedis) setup() error {
-	log.Printf("setup redis under %s", r.runtimePath)
+	logs.Printf("setup redis under %s", r.runtimePath)
 	// download binary is not exist
 	if !fileExists(binPath) {
 		if err := downloadRedisBinary(); err != nil {
@@ -96,7 +96,7 @@ func downloadRedisBinary() error {
 		return fmt.Errorf("unsupported platform %s", GOOS)
 	}
 
-	log.Printf("download redis-server from %s", link)
+	logs.Printf("download redis-server from %s", link)
 	resp, err := http.Get(link)
 	if err != nil {
 		return fmt.Errorf("cannot download, err: %s", err)

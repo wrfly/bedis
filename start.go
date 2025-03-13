@@ -22,12 +22,12 @@ func (r *builtinRedis) start(ctx context.Context) error {
 	if err := cmd.Start(); err != nil {
 		return err
 	}
-	log.Printf("redis starting")
+	logs.Printf("redis starting")
 
 	// set cpu affinity
 	if r.opt.CPUAffinity {
 		if cpu, err := setCPUAffinity(cmd.Process.Pid); err != nil {
-			log.Printf("set cpu affinity err: %s", err)
+			logs.Printf("set cpu affinity err: %s", err)
 		} else {
 			defer givebackCPU(cpu)
 		}
@@ -36,14 +36,14 @@ func (r *builtinRedis) start(ctx context.Context) error {
 	go func() {
 		in := bufio.NewScanner(stdout)
 		for in.Scan() {
-			log.Println(in.Text())
+			logs.Println(in.Text())
 		}
 	}()
 
 	go func() {
 		in := bufio.NewScanner(stderr)
 		for in.Scan() {
-			log.Println(in.Text())
+			logs.Println(in.Text())
 		}
 	}()
 
@@ -54,7 +54,7 @@ func (r *builtinRedis) checkStatus() error {
 	// check if redis started
 	for i := 0; i <= 3; i++ {
 		if !fileExists(r.socketPath) {
-			log.Printf("redis socket %s not exist", r.socketPath)
+			logs.Printf("redis socket %s not exist", r.socketPath)
 			time.Sleep(time.Millisecond * 100 * time.Duration(i+1))
 			continue
 		}
